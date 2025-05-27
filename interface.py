@@ -100,23 +100,73 @@ def show_map_image():
     if not city:
         messagebox.showwarning("Lipsă", "Introduceți o locație.")
         return
+
     try:
-        geo = requests.get(
-            f"https://nominatim.openstreetmap.org/search",
-            params={"q":city,"format":"json","limit":1},
-            headers={"User-Agent":"CarSense-App"}
-        ).json()
+        # 1. Geocoding cu Nominatim
+        geo_resp = requests.get(
+            "https://nominatim.openstreetmap.org/search",
+            params={"q": city, "format": "jsonv2", "limit": 1},
+            headers={"User-Agent": "CarSense-App"}
+        )
+        geo_resp.raise_for_status()
+        geo = geo_resp.json()
         if not geo:
             raise Exception("Locație necunoscută")
-        lat, lon = geo[0]["lat"], geo[0]["lon"]
-        url = f"https://static-maps.yandex.ru/1.x/?ll={lon},{lat}&z=12&size=400,400&l=map&pt={lon},{lat},pm2rdm"
-        img_data = requests.get(url).content
-        img = Image.open(io.BytesIO(img_data)).resize((400,400))
-        win = tk.Toplevel(root); win.title(f"Hartă {city}")
+        lat = float(geo[0]["lat"])
+        lon = float(geo[0]["lon"])
+
+        # 2. Detalii locale cu GeoNames
+        # Înregistrare gratuită la http://www.geonames.org/login
+        GEONAMES_USERNAME = "demo"  # înlocuiește cu username-ul tău
+        gn_resp = requests.get(
+            "http://api.geonames.org/findNearbyPlaceNameJSON",
+            params={"lat": lat, "lng": lon, "username": GEONAMES_USERNAME}
+        )
+        gn_resp.raise_for_status()
+        gn = gn_resp.json().get("geonames", [])
+        if gn:
+            details = gn[0]
+            name       = details.get("name", city)
+            region     = details.get("adminName1", "-")
+            country    = details.get("countryName", "-")
+            population = details.get("population", "-")
+            postal     = details.get("postalcode", "-")
+        else:
+            name, region, country, population, postal = city, "-", "-", "-", "-"
+
+        # 3. Construiește URL Harta Yandex
+        map_url = (
+            f"https://static-maps.yandex.ru/1.x/"
+            f"?ll={lon:.5f},{lat:.5f}&z=12&size=400,400&l=map&"
+            f"pt={lon:.5f},{lat:.5f},pm2rdm"
+        )
+        img_data = requests.get(map_url).content
+        img = Image.open(io.BytesIO(img_data)).resize((400, 400))
         img_tk = ImageTk.PhotoImage(img)
-        tk.Label(win, image=img_tk).pack(); win.image = img_tk
+
+        # 4. Fereastră nouă și afișare
+        win = tk.Toplevel(root)
+        win.title(f"Hartă și detalii pentru {city}")
+
+        canvas = tk.Canvas(win, width=400, height=400)
+        canvas.pack()
+        canvas.create_image(0, 0, anchor="nw", image=img_tk)
+        win.image = img_tk  # păstrăm referința
+
+        # 5. Afișăm coordonate și detalii sub hartă
+        info = (
+            f"Nume localitate: {name}\n"
+            f"Regiune: {region}\n"
+            f"Țară: {country}\n"
+            f"Populație: {population}\n"
+            f"Cod poștal: {postal}\n"
+            f"Coordonate: {lat:.5f}, {lon:.5f}"
+        )
+        lbl = tk.Label(win, text=info, justify="left", font=("Arial", 10))
+        lbl.pack(pady=10)
+
     except Exception as e:
-        messagebox.showerror("Eroare hartă", str(e))
+        messagebox.showerror("Eroare hartă & detalii", str(e))
 
 def show_weather():
     sel = sensors_list.curselection()
