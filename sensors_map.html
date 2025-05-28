@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_3cb8dbf307e71cd37a88fdc41b1e2f55 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_3cb8dbf307e71cd37a88fdc41b1e2f55" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_3cb8dbf307e71cd37a88fdc41b1e2f55 = L.map(
+                "map_3cb8dbf307e71cd37a88fdc41b1e2f55",
+                {
+                    center: [45.9432, 24.9668],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 6,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_bba729bc669762a019ba04d12ae421c8 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_bba729bc669762a019ba04d12ae421c8.addTo(map_3cb8dbf307e71cd37a88fdc41b1e2f55);
+        
+    
+            var marker_4bc86abdcc304a84500710df33039cd8 = L.marker(
+                [46.8644344, 25.5288438],
+                {
+}
+            ).addTo(map_3cb8dbf307e71cd37a88fdc41b1e2f55);
+        
+    
+            var icon_54f4648314dcc81a3373265194d168c0 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_1c985601087543ab6f6f4bc806b2b003 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_af9dbc24890bcc48302762a7336f9719 = $(`<div id="html_af9dbc24890bcc48302762a7336f9719" style="width: 100.0%; height: 100.0%;"><b>Tip:</b> temperature<br><b>Valoare:</b> -30.49 °C<br><b>Vehicul:</b> <br><b>Locație:</b> DJ128, Jolotca, Ditrău, Harghita, 537091, România<br><b>Timp:</b> 2025-05-28T20:10:16<br><b>Cod meteo:</b> 61 - Ploaie<br></div>`)[0];
+                popup_1c985601087543ab6f6f4bc806b2b003.setContent(html_af9dbc24890bcc48302762a7336f9719);
+            
+        
+
+        marker_4bc86abdcc304a84500710df33039cd8.bindPopup(popup_1c985601087543ab6f6f4bc806b2b003)
+        ;
+
+        
+    
+    
+            marker_4bc86abdcc304a84500710df33039cd8.bindTooltip(
+                `<div>
+                     temperature @ DJ128, Jolotca, Ditrău, Harghita, 537091, România
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_4bc86abdcc304a84500710df33039cd8.setIcon(icon_54f4648314dcc81a3373265194d168c0);
+            
+    
+            var marker_8403d226e5f020ea1711fe5cca546349 = L.marker(
+                [44.4893925, 23.7375816],
+                {
+}
+            ).addTo(map_3cb8dbf307e71cd37a88fdc41b1e2f55);
+        
+    
+            var icon_d2a00c0e5a1c3406da1225268322029d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_694514eba88e23344415da622d7791da = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_6d2da4338411a905d529b6aa18cba56d = $(`<div id="html_6d2da4338411a905d529b6aa18cba56d" style="width: 100.0%; height: 100.0%;"><b>Tip:</b> temperature<br><b>Valoare:</b> 123.83 °C<br><b>Vehicul:</b> <br><b>Locație:</b> Țandăra, Goiești, Dolj, 207322, România<br><b>Timp:</b> 2025-05-28T20:13:07<br><b>Cod meteo:</b> 3 - Înnorat complet<br></div>`)[0];
+                popup_694514eba88e23344415da622d7791da.setContent(html_6d2da4338411a905d529b6aa18cba56d);
+            
+        
+
+        marker_8403d226e5f020ea1711fe5cca546349.bindPopup(popup_694514eba88e23344415da622d7791da)
+        ;
+
+        
+    
+    
+            marker_8403d226e5f020ea1711fe5cca546349.bindTooltip(
+                `<div>
+                     temperature @ Țandăra, Goiești, Dolj, 207322, România
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_8403d226e5f020ea1711fe5cca546349.setIcon(icon_d2a00c0e5a1c3406da1225268322029d);
+            
+</script>
+</html>

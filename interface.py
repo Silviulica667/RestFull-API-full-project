@@ -1,60 +1,126 @@
-
-# interface.py
 import tkinter as tk
 from tkinter import messagebox, ttk
 from PIL import Image, ImageTk
-import requests, io, random, datetime
+import requests, io, random, datetime, webbrowser
+import folium, os
+import matplotlib.pyplot as plt
 
-API_URL     = "http://127.0.0.1:5000/senzori"
-GEOCODE_URL = "http://127.0.0.1:5000/geocode"
+API_URL = "http://127.0.0.1:5000/senzori"
 WEATHER_URL = "http://127.0.0.1:5000/senzori/{}/weather"
 
 CAR_SENSOR_TYPES = {
-    "temperature": ("\u00b0C", -40, 150),
-    "speed":       ("km/h", 0,   300),
-    "rpm":         ("RPM", 0,    8000),
-    "fuel":        ("%", 0,      100),
-    "battery":     ("V", 11.5,  14.8)
+    "temperature": ("°C", -40, 150),
+    "speed":       ("km/h", 0, 300),
+    "rpm":         ("RPM", 0, 8000),
+    "fuel":        ("%", 0, 100),
+    "battery":     ("V", 11.5, 14.8)
+}
+
+COUNTRIES_COORDINATES = {
+    "România": [(43.6, 27.0), (48.2, 21.2)],
+    "Germania": [(47.3, 5.9), (55.1, 15.0)],
+    "Franța":   [(42.3, -5.1), (51.1, 8.2)],
+    "Italia":   [(36.6, 6.6), (47.1, 18.5)]
 }
 
 senzori_data = []
+root = tk.Tk()
+root.title("CarSense - Smart Vehicle Tracker")
+notebook = ttk.Notebook(root)
+frame_main = ttk.Frame(notebook)
+frame_map = ttk.Frame(notebook)
+notebook.add(frame_main, text="Senzori")
+notebook.add(frame_map, text="Hartă")
+notebook.pack(expand=True, fill="both")
+
+tk.Label(frame_main, text="Senzori în baza de date:").pack()
+sensors_list = tk.Listbox(frame_main, width=100)
+sensors_list.pack(pady=5)
+
+filter_frame = tk.Frame(frame_main)
+filter_frame.pack(pady=2)
+filter_tip = ttk.Combobox(filter_frame, values=[""] + list(CAR_SENSOR_TYPES.keys()), width=20)
+filter_tip.set("")
+filter_tip.pack(side=tk.LEFT, padx=5)
+filter_vehicul = tk.Entry(filter_frame, width=20)
+filter_vehicul.pack(side=tk.LEFT, padx=5)
+tk.Button(filter_frame, text="Filtrează", command=lambda: refresh_list()).pack(side=tk.LEFT, padx=5)
+
+entry_country = ttk.Combobox(frame_main, values=list(COUNTRIES_COORDINATES.keys()))
+entry_country.current(0)
+tk.Label(frame_main, text="Țara pentru coordonate aleatorii").pack()
+entry_country.pack()
+
+entry_tip = ttk.Combobox(frame_main, values=list(CAR_SENSOR_TYPES.keys())); entry_tip.current(0)
+tk.Label(frame_main, text="Tip senzor").pack(); entry_tip.pack()
+entry_locatie = tk.Entry(frame_main); tk.Label(frame_main, text="Locație").pack(); entry_locatie.pack()
+entry_vehicul = tk.Entry(frame_main); tk.Label(frame_main, text="Vehicul").pack(); entry_vehicul.pack()
+entry_time = tk.Entry(frame_main); tk.Label(frame_main, text="Timp").pack(); entry_time.pack()
+
+def update_time():
+    entry_time.delete(0, tk.END)
+    entry_time.insert(0, datetime.datetime.now().isoformat(timespec="seconds"))
+    root.after(1000, update_time)
+update_time()
+
+def get_random_location(country):
+    bounds = COUNTRIES_COORDINATES.get(country)
+    if not bounds: return "Unknown"
+    lat_min, lon_min = bounds[0]
+    lat_max, lon_max = bounds[1]
+    lat = round(random.uniform(lat_min, lat_max), 5)
+    lon = round(random.uniform(lon_min, lon_max), 5)
+    try:
+        resp = requests.get("https://nominatim.openstreetmap.org/reverse",
+            params={"lat": lat, "lon": lon, "format": "json"},
+            headers={"User-Agent": "CarSense-App"}).json()
+        return resp.get("address", {}).get("city") or resp.get("display_name", f"{lat}, {lon}")
+    except:
+        return f"{lat}, {lon}"
 
 def refresh_list():
     global senzori_data
     try:
-        resp = requests.get(API_URL); resp.raise_for_status()
+        resp = requests.get(API_URL)
+        resp.raise_for_status()
+        all_data = resp.json()
+        senzori_data.clear()
         sensors_list.delete(0, tk.END)
-        senzori_data = resp.json()
-        for s in senzori_data:
+
+        tip_filter = filter_tip.get().lower()
+        vehicul_filter = filter_vehicul.get().lower()
+
+        for s in all_data:
+            if tip_filter and s["tip"].lower() != tip_filter:
+                continue
+            if vehicul_filter and vehicul_filter not in s.get("vehicul", "").lower():
+                continue
+            senzori_data.append(s)
             sensors_list.insert(tk.END,
-                f"{s['id']}, {s['tip']}, {s['valoare']} {s.get('unitate','')}," \
-                f" {s['locatie']}, {s.get('vehicul','')}," \
-                f" {s['time']}"
-            )
+                f"ID:{s['id']} | {s['tip']} = {s['valoare']} {s.get('unitate','')} | Loc: {s['locatie']} | Vehicul: {s.get('vehicul','')} | Timp: {s['time']}")
     except Exception as e:
-        messagebox.showerror("Eroare", f"Nu s-au putut încărca senzorii: {e}")
+        messagebox.showerror("Eroare", str(e))
 
 def on_select_sensor(event):
     sel = sensors_list.curselection()
     if not sel: return
     s = senzori_data[sel[0]]
     entry_tip.set(s.get("tip",""))
-    entry_locatie.delete(0, tk.END)
-    entry_locatie.insert(0, s.get("locatie",""))
-    entry_vehicul.delete(0, tk.END)
-    entry_vehicul.insert(0, str(s.get("vehicul","")))
-    entry_time.delete(0, tk.END)
-    entry_time.insert(0, s.get("time",""))
+    entry_locatie.delete(0, tk.END); entry_locatie.insert(0, s.get("locatie",""))
+    entry_vehicul.delete(0, tk.END); entry_vehicul.insert(0, s.get("vehicul",""))
+    entry_time.delete(0, tk.END); entry_time.insert(0, s.get("time",""))
 
 def add_sensor():
     try:
         tip = entry_tip.get()
-        unit, mn, mx = CAR_SENSOR_TYPES.get(tip, ("",0,1))
+        unit, mn, mx = CAR_SENSOR_TYPES.get(tip, ("", 0, 1))
+        country = entry_country.get()
+        location_name = get_random_location(country)
         data = {
             "id": random.randint(1000,9999),
             "tip": tip,
-            "valoare": round(random.uniform(mn,mx),2),
-            "locatie": entry_locatie.get(),
+            "valoare": round(random.uniform(mn, mx), 2),
+            "locatie": location_name,
             "vehicul": entry_vehicul.get(),
             "time": entry_time.get()
         }
@@ -86,87 +152,9 @@ def update_sensor():
 def delete_sensor():
     sel = sensors_list.curselection()
     if sel:
-        sid = int(sensors_list.get(sel[0]).split(",")[0].strip())
+        sid = senzori_data[sel[0]]['id']
         requests.delete(f"{API_URL}/{sid}")
         refresh_list()
-
-def update_time():
-    entry_time.delete(0, tk.END)
-    entry_time.insert(0, datetime.datetime.now().isoformat(timespec="seconds"))
-    root.after(1000, update_time)
-
-def show_map_image():
-    city = entry_locatie.get().strip()
-    if not city:
-        messagebox.showwarning("Lipsă", "Introduceți o locație.")
-        return
-
-    try:
-        # 1. Geocoding cu Nominatim
-        geo_resp = requests.get(
-            "https://nominatim.openstreetmap.org/search",
-            params={"q": city, "format": "jsonv2", "limit": 1},
-            headers={"User-Agent": "CarSense-App"}
-        )
-        geo_resp.raise_for_status()
-        geo = geo_resp.json()
-        if not geo:
-            raise Exception("Locație necunoscută")
-        lat = float(geo[0]["lat"])
-        lon = float(geo[0]["lon"])
-
-        # 2. Detalii locale cu GeoNames
-        # Înregistrare gratuită la http://www.geonames.org/login
-        GEONAMES_USERNAME = "demo"  # înlocuiește cu username-ul tău
-        gn_resp = requests.get(
-            "http://api.geonames.org/findNearbyPlaceNameJSON",
-            params={"lat": lat, "lng": lon, "username": GEONAMES_USERNAME}
-        )
-        gn_resp.raise_for_status()
-        gn = gn_resp.json().get("geonames", [])
-        if gn:
-            details = gn[0]
-            name       = details.get("name", city)
-            region     = details.get("adminName1", "-")
-            country    = details.get("countryName", "-")
-            population = details.get("population", "-")
-            postal     = details.get("postalcode", "-")
-        else:
-            name, region, country, population, postal = city, "-", "-", "-", "-"
-
-        # 3. Construiește URL Harta Yandex
-        map_url = (
-            f"https://static-maps.yandex.ru/1.x/"
-            f"?ll={lon:.5f},{lat:.5f}&z=12&size=400,400&l=map&"
-            f"pt={lon:.5f},{lat:.5f},pm2rdm"
-        )
-        img_data = requests.get(map_url).content
-        img = Image.open(io.BytesIO(img_data)).resize((400, 400))
-        img_tk = ImageTk.PhotoImage(img)
-
-        # 4. Fereastră nouă și afișare
-        win = tk.Toplevel(root)
-        win.title(f"Hartă și detalii pentru {city}")
-
-        canvas = tk.Canvas(win, width=400, height=400)
-        canvas.pack()
-        canvas.create_image(0, 0, anchor="nw", image=img_tk)
-        win.image = img_tk  # păstrăm referința
-
-        # 5. Afișăm coordonate și detalii sub hartă
-        info = (
-            f"Nume localitate: {name}\n"
-            f"Regiune: {region}\n"
-            f"Țară: {country}\n"
-            f"Populație: {population}\n"
-            f"Cod poștal: {postal}\n"
-            f"Coordonate: {lat:.5f}, {lon:.5f}"
-        )
-        lbl = tk.Label(win, text=info, justify="left", font=("Arial", 10))
-        lbl.pack(pady=10)
-
-    except Exception as e:
-        messagebox.showerror("Eroare hartă & detalii", str(e))
 
 def show_weather():
     sel = sensors_list.curselection()
@@ -175,62 +163,131 @@ def show_weather():
         return
     sid = senzori_data[sel[0]]["id"]
     try:
-        r = requests.get(WEATHER_URL.format(sid))
-        r.raise_for_status()
+        r = requests.get(WEATHER_URL.format(sid)); r.raise_for_status()
         w = r.json()
-
-        # Descrieri pentru coduri meteo
-        weather_codes = {
-            0: "Cer senin", 1: "Înnorat ușor", 2: "Înnorat", 3: "Cer acoperit",
-            45: "Ceață", 48: "Ceață cu depunere", 51: "Burniță slabă",
-            61: "Ploaie slabă", 63: "Ploaie moderată", 65: "Ploaie puternică",
-            71: "Ninsoare slabă", 73: "Ninsoare moderată", 80: "Averse ușoare",
-            95: "Furtună", 96: "Furtună cu grindină slabă", 99: "Furtună cu grindină puternică"
-        }
-
         msg = (
             f"Vreme la {w['datetime']} în {w['location']}:\n"
             f" • Temperatură: {w['temperature_2m']} °C\n"
             f" • Umiditate: {w['humidity']} %\n"
             f" • Precipitații: {w['precipitation']} mm\n"
-            f" • Cod meteo: {w['weathercode']} ({weather_codes.get(w['weathercode'], 'Necunoscut')})\n"
+            f" • Cod meteo: {w['weathercode']}\n"
             f" • Vânt: {w['windspeed_10m']} km/h la {w['winddirection_10m']}°"
         )
         messagebox.showinfo(f"Vreme pentru senzor {sid}", msg)
     except Exception as e:
         messagebox.showerror("Eroare vreme", str(e))
 
-# === GUI ===
-root = tk.Tk()
-root.title("CarSense - Interfață Extinsă")
+def show_history_plot():
+    sel = sensors_list.curselection()
+    if not sel:
+        messagebox.showwarning("Istoric", "Selectează un senzor.")
+        return
+    s = senzori_data[sel[0]]
+    tip = s['tip']; valoare = float(s['valoare'])
+    unit = CAR_SENSOR_TYPES.get(tip, ("",))[0]
+    valori = [round(valoare + random.uniform(-5, 5), 2) for _ in range(10)]
+    timp = [f"T-{i}" for i in range(10, 0, -1)]
+    plt.figure(figsize=(8, 4))
+    plt.plot(timp, valori, marker='o')
+    plt.title(f"Istoric valori pentru senzorul '{tip}'")
+    plt.xlabel("Timp (simulat)")
+    plt.ylabel(f"Valoare ({unit})")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
-frame = tk.Frame(root, padx=10, pady=10)
-frame.pack()
+def show_selected_sensor_on_map():
+    sel = sensors_list.curselection()
+    if not sel:
+        messagebox.showwarning("Selectează", "Selectează un senzor din listă.")
+        return
+    s = senzori_data[sel[0]]
+    loc = s.get("locatie", "")
+    try:
+        geo = requests.get("https://nominatim.openstreetmap.org/search",
+            params={"q": loc, "format": "json", "limit": 1},
+            headers={"User-Agent": "CarSense-App"}).json()
+        if not geo: return
+        lat, lon = float(geo[0]["lat"]), float(geo[0]["lon"])
+        m = folium.Map(location=[lat, lon], zoom_start=10)
+        popup = (
+            f"<b>Tip:</b> {s['tip']}<br><b>Valoare:</b> {s['valoare']} {s.get('unitate','')}<br>"
+            f"<b>Vehicul:</b> {s.get('vehicul','')}<br><b>Locație:</b> {loc}<br><b>Timp:</b> {s['time']}<br>"
+        )
+        w = requests.get(WEATHER_URL.format(s["id"]))
+        if w.status_code == 200:
+            wj = w.json()
+            codes = {0: "Cer senin", 1: "Parțial noros", 2: "Noros", 3: "Înnorat", 95: "Furtună"}
+            popup += f"<b>Cod meteo:</b> {wj.get('weathercode')} - {codes.get(wj.get('weathercode'), 'necunoscut')}<br>"
+        folium.Marker([lat, lon], popup=folium.Popup(popup, max_width=300)).add_to(m)
+        m.save("selected_sensor_map.html")
+        webbrowser.open(f"file://{os.path.abspath('selected_sensor_map.html')}")
+    except Exception as e:
+        messagebox.showerror("Eroare hartă", str(e))
 
-tk.Label(frame, text="Senzori în baza de date:").pack()
-sensors_list = tk.Listbox(frame, width=80)
-sensors_list.pack(pady=5)
-sensors_list.bind("<<ListboxSelect>>", on_select_sensor)
-
-entry_tip = ttk.Combobox(frame, values=list(CAR_SENSOR_TYPES.keys()))
-entry_tip.current(0); tk.Label(frame, text="Tip senzor").pack(); entry_tip.pack()
-entry_locatie = tk.Entry(frame); tk.Label(frame, text="Locație").pack(); entry_locatie.pack()
-entry_vehicul = tk.Entry(frame); tk.Label(frame, text="Vehicul").pack(); entry_vehicul.pack()
-entry_time = tk.Entry(frame); tk.Label(frame, text="Timp").pack(); entry_time.pack()
-
-update_time()
-
-btn_frame = tk.Frame(frame)
-btn_frame.pack(pady=5)
+btn_frame = tk.Frame(frame_main); btn_frame.pack(pady=5)
 for txt, cmd in [
     ("Adaugă senzor", add_sensor),
     ("Șterge senzor", delete_sensor),
     ("Modifică senzor", update_sensor),
-    ("Hartă locație", show_map_image),
-    ("Vreme senzor", show_weather)
+    ("Vreme senzor", show_weather),
+    ("Istoric senzor", show_history_plot)
 ]:
-    tk.Button(btn_frame, text=txt, width=15, command=cmd).pack(side=tk.LEFT, padx=2)
+    tk.Button(btn_frame, text=txt, width=18, command=cmd).pack(side=tk.LEFT, padx=2)
 
+tk.Button(frame_map, text="Toți senzorii", command=lambda: generate_map(False)).pack(pady=5)
+tk.Button(frame_map, text="Doar probleme", command=lambda: generate_map(True)).pack(pady=5)
+tk.Button(frame_map, text="Locația senzorului selectat", command=show_selected_sensor_on_map).pack(pady=5)
+
+def generate_map(only_problems=False):
+    m = folium.Map(location=[45.9432, 24.9668], zoom_start=6)
+    SENSOR_LIMITS = {
+        "temperature": lambda v: v < -20 or v > 100,
+        "speed":       lambda v: v > 250,
+        "rpm":         lambda v: v > 6000,
+        "fuel":        lambda v: v < 10,
+        "battery":     lambda v: v < 12
+    }
+    weather_codes = {
+        0: "Cer senin", 1: "Parțial noros", 2: "Noros", 3: "Înnorat complet",
+        45: "Ceață", 48: "Ceață cu chiciură", 51: "Burniță", 61: "Ploaie",
+        71: "Ninsoare", 80: "Averse", 95: "Furtună", 96: "Furtună cu grindină", 99: "Furtună puternică"
+    }
+    added = 0
+    for s in senzori_data:
+        loc = s.get("locatie", "")
+        try:
+            geo = requests.get("https://nominatim.openstreetmap.org/search",
+                params={"q": loc, "format": "json", "limit": 1},
+                headers={"User-Agent": "CarSense-App"}).json()
+            if not geo: continue
+            lat, lon = float(geo[0]["lat"]), float(geo[0]["lon"])
+            val = s["valoare"]; tip = s["tip"]
+            problema = SENSOR_LIMITS.get(tip, lambda x: False)(val)
+            if only_problems and not problema: continue
+            popup = (
+                f"<b>Tip:</b> {tip}<br><b>Valoare:</b> {val} {s.get('unitate','')}<br>"
+                f"<b>Vehicul:</b> {s.get('vehicul','')}<br><b>Locație:</b> {loc}<br><b>Timp:</b> {s['time']}<br>"
+            )
+            weather = {}
+            try:
+                w = requests.get(WEATHER_URL.format(s["id"]))
+                if w.status_code == 200: weather = w.json()
+            except: pass
+            if weather:
+                cod = weather.get("weathercode", "-")
+                popup += f"<b>Cod meteo:</b> {cod} - {weather_codes.get(cod, 'necunoscut')}<br>"
+            color = "red" if problema else "green"
+            folium.Marker([lat, lon], popup=folium.Popup(popup, max_width=300),
+                          tooltip=f"{tip} @ {loc}", icon=folium.Icon(color=color)).add_to(m)
+            added += 1
+        except: continue
+    if added == 0:
+        messagebox.showwarning("Harta", "Nicio locație validă.")
+        return
+    m.save("sensors_map.html")
+    webbrowser.open(f"file://{os.path.abspath('sensors_map.html')}")
+
+sensors_list.bind("<<ListboxSelect>>", on_select_sensor)
 refresh_list()
 root.mainloop()
-
