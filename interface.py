@@ -27,8 +27,9 @@ COUNTRIES_COORDINATES = {
     "Italia":   [(36.6, 6.6), (47.1, 18.5)]
 }
 
-API_URL = "https://restfull-api-full-project.up.railway.app/senzori"
-WEATHER_URL = "https://restfull-api-full-project.up.railway.app/senzori/{}/weather"
+API_URL = "https://restfull-api-full-project-production.up.railway.app/senzori"
+
+WEATHER_URL = "https://restfull-api-full-project-production.up.railway.app/senzori/{}/weather"
 
 senzori_data = []
 
