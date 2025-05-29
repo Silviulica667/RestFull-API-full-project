@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_5ce19029e7b7f8e42c09d434be6b2b18 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_5ce19029e7b7f8e42c09d434be6b2b18" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_5ce19029e7b7f8e42c09d434be6b2b18 = L.map(
+                "map_5ce19029e7b7f8e42c09d434be6b2b18",
+                {
+                    center: [45.9, 24.9],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 6,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_8eb14a66b14d529e72c14b72d6a3a9f3 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_8eb14a66b14d529e72c14b72d6a3a9f3.addTo(map_5ce19029e7b7f8e42c09d434be6b2b18);
+        
+    
+            var marker_468179d10b0fef3401c645cd5648249a = L.marker(
+                [48.0932327, 21.8839425],
+                {
+}
+            ).addTo(map_5ce19029e7b7f8e42c09d434be6b2b18);
+        
+    
+            var icon_a3eadad61851720c48756010986085a8 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_2fd61037b73f6a0a7c0303243a09a714 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_76c71092cd83dbf0f7bcc59cb65df4ca = $(`<div id="html_76c71092cd83dbf0f7bcc59cb65df4ca" style="width: 100.0%; height: 100.0%;">             <div style='width: 260px; font-size: 13px; line-height: 1.5; white-space: normal;'>             <b>Tip senzor:</b> speed<br>             <b>Valoare:</b> 187.83 <br>             <b>Vehicul:</b> Ford<br>             <b>Locație:</b> Kék, Kemecsei járás, Szabolcs-Szatmár-Bereg vármegye, Észak-Alföld, Alföld és Észak, 4515, Magyarország<br>             <b>Data:</b> 2025-05-29T11:13:52<br>             <b>Vreme:</b> necunoscut (cod 55)<br>             <b>Temp. exterioară:</b> 13.8 °C             </div>             </div>`)[0];
+                popup_2fd61037b73f6a0a7c0303243a09a714.setContent(html_76c71092cd83dbf0f7bcc59cb65df4ca);
+            
+        
+
+        marker_468179d10b0fef3401c645cd5648249a.bindPopup(popup_2fd61037b73f6a0a7c0303243a09a714)
+        ;
+
+        
+    
+    
+                marker_468179d10b0fef3401c645cd5648249a.setIcon(icon_a3eadad61851720c48756010986085a8);
+            
+    
+            var marker_4db1e0d5cd815667877da06226edbf7e = L.marker(
+                [44.8881513, 25.2467752],
+                {
+}
+            ).addTo(map_5ce19029e7b7f8e42c09d434be6b2b18);
+        
+    
+            var icon_f24bdf176e98fcab1110f96624111a99 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_ef6416c01f47f8a127cb2730e3bda50f = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_b1d1acb8ff9788a202ec60027404819f = $(`<div id="html_b1d1acb8ff9788a202ec60027404819f" style="width: 100.0%; height: 100.0%;">             <div style='width: 260px; font-size: 13px; line-height: 1.5; white-space: normal;'>             <b>Tip senzor:</b> engine_temp<br>             <b>Valoare:</b> 107.65 °C<br>             <b>Vehicul:</b> AM General<br>             <b>Locație:</b> Potocelu, Ludești, Dâmbovița, 137272, România<br>             <b>Data:</b> 2025-05-29T11:17:34<br>             <b>Vreme:</b> Înnorat (cod 3)<br>             <b>Temp. exterioară:</b> 17.4 °C             </div>             </div>`)[0];
+                popup_ef6416c01f47f8a127cb2730e3bda50f.setContent(html_b1d1acb8ff9788a202ec60027404819f);
+            
+        
+
+        marker_4db1e0d5cd815667877da06226edbf7e.bindPopup(popup_ef6416c01f47f8a127cb2730e3bda50f)
+        ;
+
+        
+    
+    
+                marker_4db1e0d5cd815667877da06226edbf7e.setIcon(icon_f24bdf176e98fcab1110f96624111a99);
+            
+    
+            var marker_306717107076de15627ea315b4e018f8 = L.marker(
+                [43.5287014, 22.2646938],
+                {
+}
+            ).addTo(map_5ce19029e7b7f8e42c09d434be6b2b18);
+        
+    
+            var icon_fa2177c8bc47b60e8fa60cd8d46ab192 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_4fa18034f773323e6bd7e9896140f4ff = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_cdb6df470b7b4599c7da39968c8a861d = $(`<div id="html_cdb6df470b7b4599c7da39968c8a861d" style="width: 100.0%; height: 100.0%;">             <div style='width: 260px; font-size: 13px; line-height: 1.5; white-space: normal;'>             <b>Tip senzor:</b> fuel_level<br>             <b>Valoare:</b> 64.0 %<br>             <b>Vehicul:</b> AM General<br>             <b>Locație:</b> Општина Књажевац<br>             <b>Data:</b> 2025-05-29T11:19:07<br>             <b>Vreme:</b> necunoscut (cod 61)<br>             <b>Temp. exterioară:</b> 15.0 °C             </div>             </div>`)[0];
+                popup_4fa18034f773323e6bd7e9896140f4ff.setContent(html_cdb6df470b7b4599c7da39968c8a861d);
+            
+        
+
+        marker_306717107076de15627ea315b4e018f8.bindPopup(popup_4fa18034f773323e6bd7e9896140f4ff)
+        ;
+
+        
+    
+    
+                marker_306717107076de15627ea315b4e018f8.setIcon(icon_fa2177c8bc47b60e8fa60cd8d46ab192);
+            
+    
+            var marker_2d75440af3e464acae3f1b163d8effb0 = L.marker(
+                [45.0494049, 22.9465304],
+                {
+}
+            ).addTo(map_5ce19029e7b7f8e42c09d434be6b2b18);
+        
+    
+            var icon_371e688afd78d7a3d7df1667d07384e3 = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_131e48b93f82f9955712eb9be046cb4b = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_802861156bd882c19be22ed969606840 = $(`<div id="html_802861156bd882c19be22ed969606840" style="width: 100.0%; height: 100.0%;">             <div style='width: 260px; font-size: 13px; line-height: 1.5; white-space: normal;'>             <b>Tip senzor:</b> fuel_level<br>             <b>Valoare:</b> 72.0 %<br>             <b>Vehicul:</b> AM General<br>             <b>Locație:</b> Tismana, Gorj, România<br>             <b>Data:</b> 2025-05-29T11:19:08<br>             <b>Vreme:</b> Noros (cod 2)<br>             <b>Temp. exterioară:</b> 18.9 °C             </div>             </div>`)[0];
+                popup_131e48b93f82f9955712eb9be046cb4b.setContent(html_802861156bd882c19be22ed969606840);
+            
+        
+
+        marker_2d75440af3e464acae3f1b163d8effb0.bindPopup(popup_131e48b93f82f9955712eb9be046cb4b)
+        ;
+
+        
+    
+    
+                marker_2d75440af3e464acae3f1b163d8effb0.setIcon(icon_371e688afd78d7a3d7df1667d07384e3);
+            
+    
+            var marker_1d8e8d3dac1ecc586e284692f5f07f17 = L.marker(
+                [43.60514, 26.4551],
+                {
+}
+            ).addTo(map_5ce19029e7b7f8e42c09d434be6b2b18);
+        
+    
+            var icon_a74d48b16b36ff8509c631579a315d4d = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_290a55a7193e5b5ba7d43cc2568c2857 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_832e85a4a825840923bf283c4653d4fe = $(`<div id="html_832e85a4a825840923bf283c4653d4fe" style="width: 100.0%; height: 100.0%;">             <div style='width: 260px; font-size: 13px; line-height: 1.5; white-space: normal;'>             <b>Tip senzor:</b> engine_temp<br>             <b>Valoare:</b> 91.64 °C<br>             <b>Vehicul:</b> AM General<br>             <b>Locație:</b> Раковски, Разград, България<br>             <b>Data:</b> 2025-05-29T11:21:12<br>             <b>Vreme:</b> Înnorat (cod 3)<br>             <b>Temp. exterioară:</b> 18.8 °C             </div>             </div>`)[0];
+                popup_290a55a7193e5b5ba7d43cc2568c2857.setContent(html_832e85a4a825840923bf283c4653d4fe);
+            
+        
+
+        marker_1d8e8d3dac1ecc586e284692f5f07f17.bindPopup(popup_290a55a7193e5b5ba7d43cc2568c2857)
+        ;
+
+        
+    
+    
+                marker_1d8e8d3dac1ecc586e284692f5f07f17.setIcon(icon_a74d48b16b36ff8509c631579a315d4d);
+            
+</script>
+</html>

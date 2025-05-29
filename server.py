@@ -16,12 +16,14 @@ cursor = conn.cursor()
 
 # Tipuri de senzori auto
 CAR_SENSOR_TYPES = {
-    "temperature": {"unit": "°C",  "min": -40, "max": 150},
-    "speed":       {"unit": "km/h","min": 0,   "max": 300},
-    "rpm":         {"unit": "RPM", "min": 0,   "max": 8000},
-    "fuel":        {"unit": "%",   "min": 0,   "max": 100},
-    "battery":     {"unit": "V",   "min": 11.5,"max": 14.8}
+    "engine_temp":       {"unit": "°C",  "min": 70,  "max": 110},
+    "coolant_temp":      {"unit": "°C",  "min": 60,  "max": 100},
+    "oil_pressure":      {"unit": "bar", "min": 1.0, "max": 5.0},
+    "battery_voltage":   {"unit": "V",   "min": 12.0,"max": 14.8},
+    "fuel_level":        {"unit": "%",   "min": 0,   "max": 100},
+    "intake_air_temp":   {"unit": "°C",  "min": -10, "max": 60}
 }
+
 
 # Migrare automată: tabel + coloana vehicul
 cursor.execute("""
