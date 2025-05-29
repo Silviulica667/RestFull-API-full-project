@@ -27,8 +27,8 @@ CAR_SENSOR_TYPES = {
 
 # Migrare automată: tabel + coloana vehicul
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS senzori (
-    id INTEGER PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS senzori2 (
+    id SERIAL PRIMARY KEY,
     tip TEXT NOT NULL,
     valoare REAL NOT NULL,
     locatie TEXT NOT NULL,
@@ -36,8 +36,11 @@ CREATE TABLE IF NOT EXISTS senzori (
     time TEXT NOT NULL
 );
 """)
+
+
+
 cursor.execute("""
-ALTER TABLE senzori
+ALTER TABLE senzori2
 ADD COLUMN IF NOT EXISTS vehicul TEXT;
 """)
 conn.commit()
@@ -45,7 +48,7 @@ conn.commit()
 
 @app.route("/senzori", methods=["GET"])
 def get_sensors():
-    cursor.execute("SELECT id, tip, valoare, locatie, vehicul, time FROM senzori;")
+    cursor.execute("SELECT id, tip, valoare, locatie, vehicul, time FROM senzori2;")
     rows = cursor.fetchall()
     sensors = []
     for r in rows:
@@ -75,39 +78,28 @@ def add_sensor():
         return jsonify({"error": f"Valoare în afara limitelor ({conf['min']}–{conf['max']})"}), 400
 
     try:
-        cursor.execute("SELECT 1 FROM senzori WHERE id = %s;", (data["id"],))
-        if cursor.fetchone():
-            # Update existent
-            cursor.execute("""
-                UPDATE senzori
-                SET tip=%s, valoare=%s, locatie=%s, vehicul=%s, time=%s
-                WHERE id=%s;
-            """, (
-                tip, valoare, data.get("locatie"),
-                data.get("vehicul"), data.get("time"), data["id"]
-            ))
-            conn.commit()
-            return jsonify({"message": "Senzor actualizat"}), 203
-        else:
-            # Insert nou
-            cursor.execute("""
-                INSERT INTO senzori (id, tip, valoare, locatie, vehicul, time)
-                VALUES (%s, %s, %s, %s, %s, %s);
-            """, (
-                data["id"], tip, valoare,
-                data.get("locatie"), data.get("vehicul"), data.get("time")
-            ))
-            conn.commit()
-            return jsonify({"message": "Senzor adăugat"}), 201
+        cursor.execute("""
+            INSERT INTO senzori2 (tip, valoare, locatie, vehicul, time)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id;
+        """, (
+            tip, valoare,
+            data.get("locatie"), data.get("vehicul"), data.get("time")
+        ))
+        new_id = cursor.fetchone()[0]
+        conn.commit()
+        return jsonify({"message": "Senzor adăugat", "id": new_id}), 201
     except Exception as e:
         conn.rollback()
+        print("Eroare la adăugare senzor:", e)  # Asta ajută la debugging
         return jsonify({"error": str(e)}), 500
+
 
 
 @app.route("/senzori/<int:sensor_id>", methods=["DELETE"])
 def delete_sensor(sensor_id):
     try:
-        cursor.execute("DELETE FROM senzori WHERE id = %s;", (sensor_id,))
+        cursor.execute("DELETE FROM senzori2 WHERE id = %s;", (sensor_id,))
         conn.commit()
         return jsonify({"message": "Senzor șters"}), 202
     except Exception as e:
@@ -140,7 +132,7 @@ def geocode():
 @app.route("/senzori/<int:sensor_id>/weather", methods=["GET"])
 def sensor_weather(sensor_id):
     # 1. Obține senzorul din DB
-    cursor.execute("SELECT locatie, time FROM senzori WHERE id = %s;", (sensor_id,))
+    cursor.execute("SELECT locatie, time FROM senzori2 WHERE id = %s;", (sensor_id,))
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Senzor nu există"}), 404

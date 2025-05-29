@@ -188,7 +188,6 @@ def add_sensor():
             vehicul = entry_marca.get()
 
         data = {
-            "id": random.randint(1000, 9999),
             "tip": tip,
             "valoare": int(random.uniform(mn, mx)) if tip == "fuel_level" else round(random.uniform(mn, mx), 2),
             "locatie": loc,
@@ -196,10 +195,13 @@ def add_sensor():
             "time": entry_time.get()
         }
 
-        requests.post(API_URL, json=data).raise_for_status()
+        r = requests.post(API_URL, json=data)
+        r.raise_for_status()
+        response_data = r.json()
         refresh_list()
     except Exception as e:
         messagebox.showerror("Eroare", str(e))
+
 
 def load_makes():
     try:
@@ -291,7 +293,37 @@ def show_history_plot():
 
 def generate_map(only_problems=False):
     m = folium.Map(location=[45.9, 24.9], zoom_start=6)
-    coduri = {0: "Cer senin", 1: "Parțial noros", 2: "Noros", 3: "Înnorat", 95: "Furtună"}
+    coduri = {
+        0: "Cer senin",
+        1: "Parțial noros",
+        2: "Noros",
+        3: "Înnorat",
+        45: "Ceață",
+        48: "Ceață cu depuneri de gheață",
+        51: "Burniță slabă",
+        53: "Burniță moderată",
+        55: "Burniță intensă",
+        56: "Burniță înghețată slabă",
+        57: "Burniță înghețată intensă",
+        61: "Ploaie slabă",
+        63: "Ploaie moderată",
+        65: "Ploaie intensă",
+        66: "Ploaie înghețată slabă",
+        67: "Ploaie înghețată intensă",
+        71: "Ninsoare slabă",
+        73: "Ninsoare moderată",
+        75: "Ninsoare abundentă",
+        77: "Fulgi de zăpadă",
+        80: "Averse slabe",
+        81: "Averse moderate",
+        82: "Averse puternice",
+        85: "Averse de ninsoare slabă",
+        86: "Averse de ninsoare intensă",
+        95: "Furtună",
+        96: "Furtună cu grindină slabă",
+        99: "Furtună cu grindină severă"
+    }
+
     limits = {
         "engine_temp":     lambda v: v > 105,
         "coolant_temp":    lambda v: v > 95,
@@ -364,13 +396,45 @@ def show_selected_sensor_on_map():
             return
 
         lat, lon = float(geo[0]["lat"]), float(geo[0]["lon"])
+
+        # Obține vremea
+        w = requests.get(WEATHER_URL.format(sensor["id"])).json()
+        cod = w.get("weathercode", "-")
+
+        coduri = {
+            0: "Cer senin", 1: "Parțial noros", 2: "Noros", 3: "Înnorat",
+            45: "Ceață", 48: "Ceață cu depuneri", 51: "Burniță slabă", 53: "Burniță moderată", 55: "Burniță puternică",
+            56: "Burniță înghețată slabă", 57: "Burniță înghețată intensă", 61: "Ploaie slabă", 63: "Ploaie moderată",
+            65: "Ploaie puternică", 66: "Ploaie înghețată slabă", 67: "Ploaie înghețată intensă",
+            71: "Ninsoare slabă", 73: "Ninsoare moderată", 75: "Ninsoare puternică", 77: "Fulgi de zăpadă",
+            80: "Averse slabe", 81: "Averse moderate", 82: "Averse puternice",
+            85: "Averse de ninsoare slabă", 86: "Averse de ninsoare intensă",
+            95: "Furtună", 96: "Furtună cu grindină", 99: "Furtună severă"
+        }
+
+        vehicul = sensor.get('vehicul', 'Necunoscut')
+        if "nicio variantă" in vehicul.lower():
+            vehicul = "Necunoscut"
+
+        popup = folium.Popup(f"""
+            <div style='width: 260px; font-size: 13px; line-height: 1.5; white-space: normal;'>
+            <b>Tip senzor:</b> {sensor['tip']}<br>
+            <b>Valoare:</b> {sensor['valoare']} {sensor.get('unitate','')}<br>
+            <b>Vehicul:</b> {vehicul}<br>
+            <b>Locație:</b> {sensor['locatie']}<br>
+            <b>Data:</b> {sensor['time']}<br>
+            <b>Vreme:</b> {coduri.get(cod, 'necunoscut')} (cod {cod})<br>
+            <b>Temp. exterioară:</b> {w.get("temperature_2m", "N/A")} °C
+            </div>
+        """, max_width=300)
+
         m = folium.Map(location=[lat, lon], zoom_start=12)
-        popup = f"{sensor['tip']} @ {sensor['locatie']} = {sensor['valoare']} {sensor.get('unitate','')}"
-        folium.Marker([lat, lon], popup=popup).add_to(m)
+        folium.Marker([lat, lon], popup=popup, icon=folium.Icon(color="blue")).add_to(m)
         m.save("selected.html")
         webbrowser.open(f"file://{os.path.abspath('selected.html')}")
     except Exception as e:
         messagebox.showerror("Eroare", f"Eroare la afișarea pe hartă: {e}")
+
 
 
 refresh_list()
