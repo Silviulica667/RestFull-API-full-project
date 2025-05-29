@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 # Conexiune PostgreSQL (Railway)
 DATABASE_URL = os.getenv("DATABASE_URL",
-    "postgresql://postgres:zzwgEzqxGdneoILQCXgLfwqLwiwYKqIm@shuttle.proxy.rlwy.net:46988/railway"
+    "postgresql://postgres:pDSmlXNxsFYsBnNkbryBUxaorrMjdVbs@centerbeam.proxy.rlwy.net:49284/railway"
 )
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 cursor = conn.cursor()
@@ -189,4 +189,6 @@ def sensor_weather(sensor_id):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000)
+
+
