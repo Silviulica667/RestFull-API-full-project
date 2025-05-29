@@ -324,13 +324,14 @@ def generate_map(only_problems=False):
         99: "Furtună cu grindină severă"
     }
 
+
     limits = {
-        "engine_temp":     lambda v: v > 105,
-        "coolant_temp":    lambda v: v > 95,
-        "oil_pressure":    lambda v: v < 1.5,
-        "battery_voltage": lambda v: v < 12.2,
-        "fuel_level":      lambda v: v < 10,
-        "intake_air_temp": lambda v: v > 50,
+        "engine_temp":     lambda v: v > 85,    # înainte era > 105
+        "coolant_temp":    lambda v: v > 80,    # înainte era > 95
+        "oil_pressure":    lambda v: v < 2.5,   # înainte era < 1.5
+        "battery_voltage": lambda v: v < 12.5,  # înainte era < 12.2
+        "fuel_level":      lambda v: v < 30,    # înainte era < 10
+        "intake_air_temp": lambda v: v > 35     # înainte era > 50
     }
 
     added = 0
