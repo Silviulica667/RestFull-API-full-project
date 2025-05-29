@@ -127,6 +127,30 @@ def geocode():
     city = addr.get("city") or addr.get("town") or addr.get("village") or addr.get("county")
     return jsonify({"lat": float(lat), "lon": float(lon), "city": city}), 200
 
+@app.route("/senzori/<int:sensor_id>", methods=["PUT"])
+def update_sensor(sensor_id):
+    data = request.json or {}
+
+    try:
+        cursor.execute("""
+            UPDATE senzori2
+            SET tip = %s, valoare = %s, locatie = %s, vehicul = %s, time = %s
+            WHERE id = %s
+        """, (
+            data.get("tip"),
+            data.get("valoare"),
+            data.get("locatie"),
+            data.get("vehicul"),
+            data.get("time"),
+            sensor_id
+        ))
+        conn.commit()
+        return jsonify({"message": "Senzor actualizat"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
 
 @app.route("/senzori/<int:sensor_id>/weather", methods=["GET"])
 def sensor_weather(sensor_id):
@@ -186,3 +210,5 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 
 
+
+#https://restfull-api-full-project-production.up.railway.app/senzori

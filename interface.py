@@ -74,7 +74,6 @@ entry_time.pack(pady=5)
 entry_marca = ctk.CTkComboBox(right_frame, values=[], width=180)
 entry_marca.pack(pady=5)
 
-# Când alegi o marcă, încarcă modelele automat
 entry_marca.configure(command=lambda val: load_models_for_make(val))
 
 
@@ -106,7 +105,6 @@ ctk.CTkButton(btn_frame, text="Harta toți", width=120, command=lambda: generate
 ctk.CTkButton(btn_frame, text="Harta probleme", width=120, command=lambda: generate_map(True)).pack(pady=2)
 ctk.CTkButton(btn_frame, text="Senzor pe hartă", width=120, command=lambda: show_selected_sensor_on_map()).pack(pady=2)
 
-# ------------- FUNCTIONS (folosește funcțiile existente din codul tău) -------------------
 
 def refresh_list():
     global sensor_buttons, selected_sensor_id
@@ -211,7 +209,6 @@ def load_makes():
         r.raise_for_status()
         data = r.json().get("data", [])
 
-        # Filtrăm mărcile valide (fără placeholder)
         makes = sorted({
             item["name"] for item in data
             if item.get("name") and "subscription required" not in item["name"].lower()
@@ -271,7 +268,8 @@ def update_sensor():
             "time": entry_time.get()
         }
 
-        r = requests.post(API_URL, json=updated_data)
+        r = requests.put(f"{API_URL}/{sensor['id']}", json=updated_data)
+
         r.raise_for_status()
         refresh_list()
         messagebox.showinfo("Succes", f"Senzorul #{sensor['id']} a fost actualizat.")
