@@ -25,7 +25,6 @@ CAR_SENSOR_TYPES = {
 }
 
 
-# Migrare automată: tabel + coloana vehicul
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS senzori2 (
     id SERIAL PRIMARY KEY,
@@ -131,14 +130,13 @@ def geocode():
 
 @app.route("/senzori/<int:sensor_id>/weather", methods=["GET"])
 def sensor_weather(sensor_id):
-    # 1. Obține senzorul din DB
+
     cursor.execute("SELECT locatie, time FROM senzori2 WHERE id = %s;", (sensor_id,))
     row = cursor.fetchone()
     if not row:
         return jsonify({"error": "Senzor nu există"}), 404
     locatie, timestr = row
 
-    # 2. Geocode oraș -> coordonate
     geo = requests.get(
         "https://nominatim.openstreetmap.org/search",
         params={"q": locatie, "format": "jsonv2", "limit": 1},
@@ -148,12 +146,10 @@ def sensor_weather(sensor_id):
         return jsonify({"error": "Localitate necunoscută"}), 400
     lat, lon = geo[0]["lat"], geo[0]["lon"]
 
-    # 3. Parsează data și ora
     dt = datetime.fromisoformat(timestr)
     date = dt.date().isoformat()
     hour_str = f"{dt.hour:02d}:00"
 
-    # 4. Apelează Open-Meteo pentru istoricul zilei, inclusiv umiditate
     params = {
         "latitude": lat, "longitude": lon,
         "start_date": date, "end_date": date,
@@ -165,14 +161,12 @@ def sensor_weather(sensor_id):
         return jsonify({"error": "Eroare la API-ul meteo"}), 502
     hourly = wresp.json().get("hourly", {})
 
-    # 5. Găsește indexul orei în lista `time`
     times = hourly.get("time", [])
     try:
         idx = times.index(f"{date}T{hour_str}")
     except ValueError:
         return jsonify({"error": "Ora nu e disponibilă în răspuns"}), 502
 
-    # 6. Returnează JSON cu toate câmpurile
     return jsonify({
         "sensor_id":        sensor_id,
         "location":         locatie,
